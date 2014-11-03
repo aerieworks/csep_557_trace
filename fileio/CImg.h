@@ -5727,7 +5727,7 @@ namespace cimg_library {
                    tmp,
                    cimg::t_normal,
 #ifdef cimg_imagemagick_path
-                   cimg::t_green,"=\""cimg_imagemagick_path"\"",
+                   cimg::t_green,"=\"" cimg_imagemagick_path "\"",
 #else
                    cimg::t_green," undefined",
 #endif

@@ -1,3 +1,4 @@
+#define cimg_imagemagick_path "/usr/local/bin/convert"
 #ifndef COMMAND_LINE_ONLY
 #include "ui/GraphicalUI.h"
 #endif

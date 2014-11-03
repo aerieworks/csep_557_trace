@@ -1,6 +1,7 @@
 //#define cimg_use_magick
 //#define cimg_use_jpeg
 
+#define cimg_imagemagick_path "/usr/local/bin/convert"
 #include "CImg.h"
 #include "imageio.h"
 

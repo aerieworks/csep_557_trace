@@ -30,7 +30,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// you'll want to use code that looks something
 	// like this:
 	//
-	// for ( vector<Light*>::const_iterator litr = scene->beginLights(); 
+	// for ( vector<Light*>::const_iterator litr = scene->beginLights();
 	// 		litr != scene->endLights(); 
 	// 		++litr )
 	// {
@@ -40,7 +40,23 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// 		.
 	// }
 
-	return kd(i);
+    const Vec3d point = r.at(i.t);
+
+    // Start with emitted light.
+    Vec3d shade = ke(i);
+    // Add ambient light effects.
+    shade += prod(ka(i), scene->ambient());
+    
+    // For each light source...
+    for (vector<Light*>::const_iterator literator = scene->beginLights(); literator != scene->endLights(); ++literator)
+    {
+        Light* light = *literator;
+        // Add diffuse light effects.
+        shade += prod(kd(i), light->getColor(point)) * max(0.0, i.N * light->getDirection(point));
+        // TODO: Add specular reflection.
+    }
+    
+	return shade;
 }
 
 
