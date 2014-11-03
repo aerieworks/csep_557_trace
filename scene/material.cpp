@@ -52,7 +52,8 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     {
         const Light* light = *literator;
         const Vec3d lightDirection = light->getDirection(point);
-        const Vec3d intensity = light->getColor(point) * light->distanceAttenuation(point);
+        const Vec3d attenuation = light->shadowAttenuation(point) * light->distanceAttenuation(point);
+        const Vec3d intensity = prod(light->getColor(point), attenuation);
         
         // Calculate diffuse term.
         const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
