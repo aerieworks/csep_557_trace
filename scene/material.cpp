@@ -50,10 +50,18 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     // For each light source...
     for (vector<Light*>::const_iterator literator = scene->beginLights(); literator != scene->endLights(); ++literator)
     {
-        Light* light = *literator;
-        // Add diffuse light effects.
-        shade += prod(kd(i), light->getColor(point)) * max(0.0, i.N * light->getDirection(point));
-        // TODO: Add specular reflection.
+        const Light* light = *literator;
+        const Vec3d lightDirection = light->getDirection(point);
+        
+        // Calculate diffuse term.
+        const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
+        // Calculate specular term (Blinn-Phong).
+        Vec3d halfAngle = lightDirection + -r.getDirection();
+        halfAngle.normalize();
+        const Vec3d specularTerm = ks(i) * pow(max(0.0, i.N * halfAngle), shininess(i));
+        
+        // Apply diffuse and specular terms to light source.
+        shade += prod(light->getColor(point), diffuseTerm + specularTerm);
     }
     
 	return shade;
