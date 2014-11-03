@@ -23,9 +23,12 @@ Vec3d DirectionalLight::shadowAttenuation( const Vec3d& P ) const
     isect i;
     if (scene->intersect(r, i))
     {
-        // No need to check distance to object, since directional lights are infinitely far away.
-        // Object is guaranteed to be closer.
-        return Vec3d(0, 0, 0);
+        if (i.t > 0.00001)
+        {
+            // No need to check distance to object, since directional lights are infinitely far away.
+            // Object is guaranteed to be closer.
+            return Vec3d(0, 0, 0);
+        }
     }
     
     return Vec3d(1,1,1);
@@ -78,10 +81,13 @@ Vec3d PointLight::shadowAttenuation(const Vec3d& P) const
     isect i;
     if (scene->intersect(r, i))
     {
-        const Vec3d isectPoint = r.at(i.t);
-        if ((isectPoint - P).length() < (position - P).length())
+        if (i.t > 0.00001)
         {
-            return Vec3d(0, 0, 0);
+            const Vec3d isectPoint = r.at(i.t);
+            if ((isectPoint - P).length() < (position - P).length())
+            {
+                return Vec3d(0, 0, 0);
+            }            
         }
     }
     

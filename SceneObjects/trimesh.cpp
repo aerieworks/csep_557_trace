@@ -72,6 +72,42 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
 	// You are also required to implement Phong normal interpolation here to compute 
 	// a more "rendering accurate" normal for the intersection point on triangle's face
 
+    // Get triangle vertices.
+    const Vec3d& a = parent->vertices[ids[0]];
+    const Vec3d& b = parent->vertices[ids[1]];
+    const Vec3d& c = parent->vertices[ids[2]];
+    
+    // Calculate properties defining triangle plane.
+    // ax + by + cz = d
+    // or: n = [a b c]^T, x = [x y z]^T, n * x = d
+    // Solve for n by taking the cross product of vectors representing two triangle sides.
+    Vec3d faceNormal = (b - a) ^ (c - a);
+    faceNormal.normalize();
+    
+    // Solve plane equation for d, using a triangle vertex as a known x that is in the plane.
+    const double d = faceNormal * a;
+    
+    // Time when ray intersects plane is found by:
+    // t = (d - n * ray.position) / (n * ray.direction)
+    const double normalDotDirection = faceNormal * r.getDirection();
+    if (normalDotDirection != 0)
+    {
+        // A non-zero means the ray intersects the plane, need to see if it does so in the triangle.
+        const double t = (d - (faceNormal * r.getPosition())) / normalDotDirection;
+        const Vec3d isectPoint = r.at(t);
+        
+        if ((((b - a) ^ (isectPoint - a)) * faceNormal >= 0)
+            && (((c - b) ^ (isectPoint - b)) * faceNormal >= 0)
+            && (((a - c) ^ (isectPoint - c)) * faceNormal >= 0))
+        {
+            i.setN(faceNormal);
+            i.setMaterial(*material);
+            i.setObject(this);
+            i.setT(t);
+            return true;
+        }
+    }
+    
     return false;
 }
 
