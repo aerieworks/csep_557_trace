@@ -56,10 +56,10 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         
         // Calculate diffuse term.
         const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
-        // Calculate specular term (Blinn-Phong).
-        Vec3d halfAngle = lightDirection + -r.getDirection();
-        halfAngle.normalize();
-        const Vec3d specularTerm = ks(i) * pow(max(0.0, i.N * halfAngle), shininess(i));
+        
+        // Calculate specular term.
+        Vec3d reflection = lightDirection - ((lightDirection * i.N) * i.N * 2);
+        const Vec3d specularTerm = ks(i) * pow(max(0.0, r.getDirection() * reflection), shininess(i));
         
         // Apply diffuse and specular terms to light source.
         shade += prod(intensity, diffuseTerm + specularTerm);
