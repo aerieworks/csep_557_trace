@@ -18,6 +18,16 @@ Vec3d DirectionalLight::shadowAttenuation( const Vec3d& P ) const
 {
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
+    const Vec3d direction = getDirection(P);
+    const ray r(P, direction);
+    isect i;
+    if (scene->intersect(r, i))
+    {
+        // No need to check distance to object, since directional lights are infinitely far away.
+        // Object is guaranteed to be closer.
+        return Vec3d(0, 0, 0);
+    }
+    
     return Vec3d(1,1,1);
 }
 
