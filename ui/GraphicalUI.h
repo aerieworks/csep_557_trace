@@ -41,7 +41,10 @@ public:
 
 	Fl_Slider*			m_sizeSlider;
 	Fl_Slider*			m_depthSlider;
-
+    Fl_Slider*          m_distAttenASlider;
+    Fl_Slider*          m_distAttenBSlider;
+    Fl_Slider*          m_distAttenCSlider;
+    
 #ifdef MULTITHREADED
 	Fl_Slider*			m_threadSlider;
 #endif
@@ -78,6 +81,9 @@ private:
 
 	static void cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_depthSlides(Fl_Widget* o, void* v);
+    static void cb_distAttenASlides(Fl_Widget* o, void* v);
+    static void cb_distAttenBSlides(Fl_Widget* o, void* v);
+    static void cb_distAttenCSlides(Fl_Widget* o, void* v);
 
 #ifdef MULTITHREADED
 	static void cb_threadSlides(Fl_Widget* o, void* v);

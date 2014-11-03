@@ -52,6 +52,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
     {
         const Light* light = *literator;
         const Vec3d lightDirection = light->getDirection(point);
+        const Vec3d intensity = light->getColor(point) * light->distanceAttenuation(point);
         
         // Calculate diffuse term.
         const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
@@ -61,7 +62,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         const Vec3d specularTerm = ks(i) * pow(max(0.0, i.N * halfAngle), shininess(i));
         
         // Apply diffuse and specular terms to light source.
-        shade += prod(light->getColor(point), diffuseTerm + specularTerm);
+        shade += prod(intensity, diffuseTerm + specularTerm);
     }
     
 	return shade;

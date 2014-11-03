@@ -171,6 +171,21 @@ void GraphicalUI::cb_depthSlides(Fl_Widget* o, void* v)
 	((GraphicalUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
 }
 
+void GraphicalUI::cb_distAttenASlides(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_distAttenA = ((Fl_Slider *)o)->value();
+}
+
+void GraphicalUI::cb_distAttenBSlides(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_distAttenB = ((Fl_Slider *)o)->value();
+}
+
+void GraphicalUI::cb_distAttenCSlides(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_distAttenC = ((Fl_Slider *)o)->value();
+}
+
 #ifdef MULTITHREADED
 void GraphicalUI::cb_threadSlides(Fl_Widget* o, void* v)
 {
@@ -380,8 +395,42 @@ GraphicalUI::GraphicalUI() : m_nativeChooser(NULL) {
 		num_threads = 4;
 #endif
 
-
+        m_distAttenASlider = new Fl_Value_Slider(10, 105, 180, 20, "Distance atten. A");
+        m_distAttenASlider->user_data((void*)(this)); // record self to be used by static callback functions
+        m_distAttenASlider->type(FL_HOR_NICE_SLIDER);
+        m_distAttenASlider->labelfont(FL_COURIER);
+        m_distAttenASlider->labelsize(12);
+        m_distAttenASlider->minimum(0);
+        m_distAttenASlider->maximum(1);
+        m_distAttenASlider->step(0.01);
+        m_distAttenASlider->value(m_distAttenA);
+        m_distAttenASlider->align(FL_ALIGN_RIGHT);
+        m_distAttenASlider->callback(cb_distAttenASlides);
 		
+        m_distAttenBSlider = new Fl_Value_Slider(10, 130, 180, 20, "Distance atten. B");
+        m_distAttenBSlider->user_data((void*)(this)); // record self to be used by static callback functions
+        m_distAttenBSlider->type(FL_HOR_NICE_SLIDER);
+        m_distAttenBSlider->labelfont(FL_COURIER);
+        m_distAttenBSlider->labelsize(12);
+        m_distAttenBSlider->minimum(0);
+        m_distAttenBSlider->maximum(1);
+        m_distAttenBSlider->step(0.01);
+        m_distAttenBSlider->value(m_distAttenB);
+        m_distAttenBSlider->align(FL_ALIGN_RIGHT);
+        m_distAttenBSlider->callback(cb_distAttenBSlides);
+
+        m_distAttenCSlider = new Fl_Value_Slider(10, 155, 180, 20, "Distance atten. C");
+        m_distAttenCSlider->user_data((void*)(this)); // record self to be used by static callback functions
+        m_distAttenCSlider->type(FL_HOR_NICE_SLIDER);
+        m_distAttenCSlider->labelfont(FL_COURIER);
+        m_distAttenCSlider->labelsize(12);
+        m_distAttenCSlider->minimum(0);
+        m_distAttenCSlider->maximum(1);
+        m_distAttenCSlider->step(0.01);
+        m_distAttenCSlider->value(m_distAttenC);
+        m_distAttenCSlider->align(FL_ALIGN_RIGHT);
+        m_distAttenCSlider->callback(cb_distAttenCSlides);
+    
 		// set up debugging display checkbox
         m_debuggingDisplayCheckButton = new Fl_Check_Button(0, 280, 180, 20, "Debugging display");
 		m_debuggingDisplayCheckButton->user_data((void*)(this));

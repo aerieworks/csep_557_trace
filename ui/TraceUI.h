@@ -25,7 +25,8 @@ class RayTracer;
 class TraceUI {
 public:
 	TraceUI()
-		: m_nDepth(0), m_nSize(150), 
+		: m_nDepth(0), m_nSize(512),
+        m_distAttenA(0.1), m_distAttenB(0.3), m_distAttenC(0.03),
 		m_displayDebuggingInfo( false ),
 		m_bsp_enabled_value( true ), 
 		raytracer( 0 )
@@ -43,6 +44,9 @@ public:
 	// accessors:
 	int		getSize() const { return m_nSize; }
 	int		getDepth() const { return m_nDepth; }
+    double  getDistanceAttenuationA() const { return m_distAttenA; }
+    double  getDistanceAttenuationB() const { return m_distAttenB; }
+    double  getDistanceAttenuationC() const { return m_distAttenC; }
 
 	void setMultithreading(bool multithread) { this->multithread = multithread; }
 	bool isMultithreading() const { return multithread; }
@@ -55,7 +59,10 @@ protected:
 
 	int			m_nSize;				// Size of the traced image
 	int			m_nDepth;				// Max depth of recursion
-
+    double      m_distAttenA;
+    double      m_distAttenB;
+    double      m_distAttenC;
+    
 	int num_threads;
 
 	int width;

@@ -1,9 +1,11 @@
 #include <cmath>
 
+#include "TraceUI.h"
 #include "light.h"
 
-
 using namespace std;
+
+extern TraceUI* traceUI;
 
 double DirectionalLight::distanceAttenuation( const Vec3d& P ) const
 {
@@ -37,7 +39,10 @@ double PointLight::distanceAttenuation( const Vec3d& P ) const
 	// You'll need to modify this method to attenuate the intensity 
 	// of the light based on the distance between the source and the 
 	// point P.  For now, we assume no attenuation and just return 1.0
-	return 1.0;
+    const double distance = (position - P).length();
+    return min(1.0, 1.0 / (traceUI->getDistanceAttenuationA()
+                           + traceUI->getDistanceAttenuationB() * distance
+                           + traceUI->getDistanceAttenuationC() * pow(distance, 2)));
 }
 
 Vec3d PointLight::getColor( const Vec3d& P ) const
