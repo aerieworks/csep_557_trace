@@ -53,6 +53,8 @@ double PointLight::distanceAttenuation( const Vec3d& P ) const
 	// of the light based on the distance between the source and the 
 	// point P.  For now, we assume no attenuation and just return 1.0
     const double distance = (position - P).length();
+    // Model distance attenuation as:
+    //      1 / (A + Bd + Cd^2)
     return min(1.0, 1.0 / (traceUI->getDistanceAttenuationA()
                            + traceUI->getDistanceAttenuationB() * distance
                            + traceUI->getDistanceAttenuationC() * pow(distance, 2)));

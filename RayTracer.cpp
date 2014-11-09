@@ -64,13 +64,28 @@ Vec3d RayTracer::traceRay( const ray& r,
 		// rays.
 
 		const Material& m = i.getMaterial();
-		return m.shade(scene, r, i);
+        
+        // Calculate direct illumination.
+		Vec3d shade = m.shade(scene, r, i);
+        
+        if (depth < traceUI->getDepth())
+        {
+            if (traceUI->getReflectionEnabled())
+            {
+                // Calculate reflected illumination.
+                const Vec3d reflectionDir = r.getDirection() - ((r.getDirection() * i.N) * i.N * 2.0);
+                ray reflectionRay(r.at(i.t), reflectionDir, ray::REFLECTION);
+                const Vec3d reflectionShade = traceRay(reflectionRay, thresh, depth + 1);
+                shade += prod(m.kr(i), reflectionShade);
+            }
+        }
+        
+        return shade;
 	
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-
 		return Vec3d( 0.0, 0.0, 0.0 );
 	}
 }

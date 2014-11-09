@@ -58,7 +58,7 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
         
         // Calculate specular term.
-        Vec3d reflection = lightDirection - ((lightDirection * i.N) * i.N * 2);
+        Vec3d reflection = lightDirection - ((lightDirection * i.N) * i.N * 2.0);
         const Vec3d specularTerm = ks(i) * pow(max(0.0, r.getDirection() * reflection), shininess(i));
         
         // Apply diffuse and specular terms to light source.

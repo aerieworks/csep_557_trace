@@ -44,6 +44,7 @@ public:
     Fl_Slider*          m_distAttenASlider;
     Fl_Slider*          m_distAttenBSlider;
     Fl_Slider*          m_distAttenCSlider;
+    Fl_Check_Button*    m_reflectionEnabledCheckButton;
     
 #ifdef MULTITHREADED
 	Fl_Slider*			m_threadSlider;
@@ -84,6 +85,7 @@ private:
     static void cb_distAttenASlides(Fl_Widget* o, void* v);
     static void cb_distAttenBSlides(Fl_Widget* o, void* v);
     static void cb_distAttenCSlides(Fl_Widget* o, void* v);
+    static void cb_reflectionEnabledCheckButton(Fl_Widget* o, void* v);
 
 #ifdef MULTITHREADED
 	static void cb_threadSlides(Fl_Widget* o, void* v);

@@ -25,8 +25,9 @@ class RayTracer;
 class TraceUI {
 public:
 	TraceUI()
-		: m_nDepth(0), m_nSize(512),
-        m_distAttenA(0.1), m_distAttenB(0.3), m_distAttenC(0.03),
+		: m_nDepth(3), m_nSize(512),
+        m_distAttenA(0.1), m_distAttenB(0.2), m_distAttenC(0.01),
+        m_reflectionEnabled(true),
 		m_displayDebuggingInfo( false ),
 		m_bsp_enabled_value( true ), 
 		raytracer( 0 )
@@ -47,6 +48,7 @@ public:
     double  getDistanceAttenuationA() const { return m_distAttenA; }
     double  getDistanceAttenuationB() const { return m_distAttenB; }
     double  getDistanceAttenuationC() const { return m_distAttenC; }
+    bool    getReflectionEnabled() const { return m_reflectionEnabled; }
 
 	void setMultithreading(bool multithread) { this->multithread = multithread; }
 	bool isMultithreading() const { return multithread; }
@@ -62,6 +64,7 @@ protected:
     double      m_distAttenA;
     double      m_distAttenB;
     double      m_distAttenC;
+    bool        m_reflectionEnabled;
     
 	int num_threads;
 

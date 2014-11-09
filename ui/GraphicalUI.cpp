@@ -186,6 +186,11 @@ void GraphicalUI::cb_distAttenCSlides(Fl_Widget* o, void* v)
     ((GraphicalUI*)(o->user_data()))->m_distAttenC = ((Fl_Slider *)o)->value();
 }
 
+void GraphicalUI::cb_reflectionEnabledCheckButton(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_reflectionEnabled = (((Fl_Check_Button *)o)->value() == 1);
+}
+
 #ifdef MULTITHREADED
 void GraphicalUI::cb_threadSlides(Fl_Widget* o, void* v)
 {
@@ -431,6 +436,11 @@ GraphicalUI::GraphicalUI() : m_nativeChooser(NULL) {
         m_distAttenCSlider->align(FL_ALIGN_RIGHT);
         m_distAttenCSlider->callback(cb_distAttenCSlides);
     
+        m_reflectionEnabledCheckButton = new Fl_Check_Button(0, 230, 180, 20, "Reflection Enabled");
+        m_reflectionEnabledCheckButton->user_data((void*)(this));
+        m_reflectionEnabledCheckButton->callback(cb_reflectionEnabledCheckButton);
+        m_reflectionEnabledCheckButton->value(m_reflectionEnabled);
+
 		// set up debugging display checkbox
         m_debuggingDisplayCheckButton = new Fl_Check_Button(0, 280, 180, 20, "Debugging display");
 		m_debuggingDisplayCheckButton->user_data((void*)(this));
