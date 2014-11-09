@@ -173,7 +173,7 @@ public:
         : _ke( e ), _ka( a ), _ks( s ), _kd( d ), _kr( r ), _kt( t ), 
           _shininess( Vec3d(sh,sh,sh) ), _index( Vec3d(in,in,in) ) {}
 
-	virtual Vec3d shade( Scene *scene, const ray& r, const isect& i ) const;
+	virtual Vec3d shade( Scene *scene, const ray& r, const isect& i, bool isInAir ) const;
 
 
     

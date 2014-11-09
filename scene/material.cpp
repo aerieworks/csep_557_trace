@@ -10,7 +10,7 @@ extern bool debugMode;
 
 // Apply the Phong model to this point on the surface of the object, returning
 // the color of that point.
-Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
+Vec3d Material::shade( Scene *scene, const ray& r, const isect& i, bool isInAir ) const
 {
 	// YOUR CODE HERE
 
@@ -23,8 +23,6 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// shading model, including the contributions of all the light sources.
     // You will need to call both distanceAttenuation() and shadowAttenuation()
     // somewhere in your code in order to compute shadows and light falloff.
-	if( debugMode )
-		std::cout << "Debugging the Phong code (or lack thereof...)" << std::endl;
 
 	// When you're iterating through the lights,
 	// you'll want to use code that looks something
@@ -44,8 +42,16 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
     // Start with emitted light.
     Vec3d shade = ke(i);
+    
     // Add ambient light effects.
-    shade += prod(ka(i), scene->ambient());
+    Vec3d ambient = prod(ka(i), scene->ambient());
+    if (!isInAir)
+    {
+        // If shading a point inside an object, ambient light had to pass through the object first.
+        // So apply the transmission factor to the ambient light to account for object's affect on light.
+        ambient = prod(kt(i), ambient);
+    }
+    shade += ambient;
     
     // For each light source...
     for (vector<Light*>::const_iterator literator = scene->beginLights(); literator != scene->endLights(); ++literator)
@@ -58,8 +64,9 @@ Vec3d Material::shade( Scene *scene, const ray& r, const isect& i ) const
         const Vec3d diffuseTerm = kd(i) * max(0.0, i.N * lightDirection);
         
         // Calculate specular term.
-        Vec3d reflection = lightDirection - ((lightDirection * i.N) * i.N * 2.0);
-        const Vec3d specularTerm = ks(i) * pow(max(0.0, r.getDirection() * reflection), shininess(i));
+        const Vec3d reflectionDir = 2.0 * (lightDirection * i.N) * i.N - lightDirection;
+        const Vec3d viewingDir = -r.getDirection();
+        const Vec3d specularTerm = ks(i) * pow(max(0.0, viewingDir * reflectionDir), shininess(i));
         
         // Apply diffuse and specular terms to light source.
         shade += prod(intensity, diffuseTerm + specularTerm);

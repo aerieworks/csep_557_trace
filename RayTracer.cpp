@@ -21,6 +21,8 @@ extern TraceUI* traceUI;
 
 using namespace std;
 
+#define AIR_REFRACTION_INDEX (1.0003)
+
 // Use this variable to decide if you want to print out
 // debugging messages.  Gets set in the "trace single ray" mode
 // in TraceGLWindow, for example.
@@ -39,19 +41,21 @@ Vec3d RayTracer::trace( double x, double y )
     ray r( Vec3d(0,0,0), Vec3d(0,0,0), ray::VISIBILITY );
 
     scene->getCamera().rayThrough( x,y,r );
-	Vec3d ret = traceRay( r, Vec3d(1.0,1.0,1.0), 0 );
-	ret.clamp();
+	Vec3d ret = traceRay( r, Vec3d(1.0,1.0,1.0), 0, true );
+    ret.clamp();
 	return ret;
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 Vec3d RayTracer::traceRay( const ray& r, 
-	const Vec3d& thresh, int depth )
+	const Vec3d& thresh, int depth, bool isInAir )
 {
 	isect i;
 
-	if( scene->intersect( r, i ) ) {
+    Vec3d directShade, reflectShade, refractShade;
+    
+    if( scene->intersect( r, i ) ) {
 		// YOUR CODE HERE
 
 		// An intersection occured!  We've got work to do.  For now,
@@ -66,28 +70,66 @@ Vec3d RayTracer::traceRay( const ray& r,
 		const Material& m = i.getMaterial();
         
         // Calculate direct illumination.
-		Vec3d shade = m.shade(scene, r, i);
+        directShade = m.shade(scene, r, i, isInAir);
         
         if (depth < traceUI->getDepth())
         {
+            Vec3d viewingDir(-r.getDirection());
+            viewingDir.normalize();
+            
             if (traceUI->getReflectionEnabled())
             {
                 // Calculate reflected illumination.
-                const Vec3d reflectionDir = r.getDirection() - ((r.getDirection() * i.N) * i.N * 2.0);
-                ray reflectionRay(r.at(i.t), reflectionDir, ray::REFLECTION);
-                const Vec3d reflectionShade = traceRay(reflectionRay, thresh, depth + 1);
-                shade += prod(m.kr(i), reflectionShade);
+                const Vec3d reflectionDir = 2.0 * (viewingDir * i.N) * i.N - viewingDir;
+                ray reflectionRay(r.at(i.t) + (reflectionDir * RAY_EPSILON), reflectionDir, ray::REFLECTION);
+                reflectShade = prod(m.kr(i), traceRay(reflectionRay, thresh, depth + 1, isInAir));
+            }
+            
+            if (traceUI->getRefractionEnabled())
+            {
+                Vec3d normal = i.N;
+                normal.normalize();
+                if (!isInAir)
+                {
+                    // The normal is always given relative to the external face.  If we are in an object, we're actually
+                    // impacting the internal face, so flip the normal.
+                    normal = -normal;
+                }
+                
+                // Calculate refracted illumination.
+                const double n_i = isInAir ? AIR_REFRACTION_INDEX : m.index(i);
+                const double n_t = isInAir ? m.index(i) : AIR_REFRACTION_INDEX;
+                const double n_ratio = n_i / n_t;
+                const double cos_theta_i = normal * viewingDir;
+                const double cos_theta_t_root_term = 1 - pow(n_ratio, 2.0) * (1 - cos_theta_i * cos_theta_i);
+
+                // A negative root term indicates total internal reflection.
+                if (cos_theta_t_root_term >= 0)
+                {
+                    const double cos_theta_t = sqrt(cos_theta_t_root_term);
+                    const Vec3d refractionDir = (n_ratio * cos_theta_i - cos_theta_t) * normal - n_ratio * viewingDir;
+                    if (debugMode) cerr << depth << ": Refraction dir: " << refractionDir << endl;
+                    ray refractionRay(r.at(i.t) + (refractionDir * RAY_EPSILON), refractionDir, ray::REFRACTION);
+                    const Vec3d refractionShade = traceRay(refractionRay, thresh, depth + 1, !isInAir);
+                    refractShade = prod(m.kt(i), refractionShade);
+                }
+                else if (debugMode)
+                {
+                    cerr << depth << ": TIR" << endl;
+                }
             }
         }
         
-        return shade;
 	
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-		return Vec3d( 0.0, 0.0, 0.0 );
+        if (debugMode) cerr << depth << ": No intersection." << endl;
+		//return Vec3d( 0.0, 0.0, 0.0 );
 	}
+    
+    return directShade + reflectShade + refractShade;
 }
 
 RayTracer::RayTracer()
