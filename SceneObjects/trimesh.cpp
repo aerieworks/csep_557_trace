@@ -94,17 +94,33 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     {
         // A non-zero means the ray intersects the plane, need to see if it does so in the triangle.
         const double t = (d - (faceNormal * r.getPosition())) / normalDotDirection;
-        const Vec3d isectPoint = r.at(t);
-        
-        if ((((b - a) ^ (isectPoint - a)) * faceNormal >= 0)
-            && (((c - b) ^ (isectPoint - b)) * faceNormal >= 0)
-            && (((a - c) ^ (isectPoint - c)) * faceNormal >= 0))
+        const Vec3d q = r.at(t);
+        const double abqDotN = ((b - a) ^ (q - a)) * faceNormal;
+        if (abqDotN >= 0)
         {
-            i.setN(faceNormal);
-            i.setMaterial(*material);
-            i.setObject(this);
-            i.setT(t);
-            return true;
+            const double qbcDotN = ((c - b) ^ (q - b)) * faceNormal;
+            if (qbcDotN >= 0)
+            {
+                const double aqcDotN = ((a - c) ^ (q - c)) * faceNormal;
+                if (aqcDotN >= 0)
+                {
+                    const double abcDotN = ((b - a) ^ (c - a)) * faceNormal;
+                    const double alpha = qbcDotN / abcDotN;
+                    const double beta = aqcDotN / abcDotN;
+                    const double gamma = abqDotN  / abcDotN;
+            
+                    Vec3d normal(parent->normals[ids[0]] * alpha +
+                                 parent->normals[ids[1]] * beta +
+                                 parent->normals[ids[2]] * gamma);
+                    normal.normalize();
+            
+                    i.setN(normal);
+                    i.setMaterial(*material);
+                    i.setObject(this);
+                    i.setT(t);
+                    return true;
+                }
+            }
         }
     }
     
