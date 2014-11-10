@@ -87,14 +87,9 @@ Vec3d RayTracer::traceRay( const ray& r,
             
             if (traceUI->getRefractionEnabled())
             {
-                Vec3d normal = i.N;
-                normal.normalize();
-                if (!isInAir)
-                {
-                    // The normal is always given relative to the external face.  If we are in an object, we're actually
-                    // impacting the internal face, so flip the normal.
-                    normal = -normal;
-                }
+                // The normal is always given relative to the external face.  If we are in an object, we're actually
+                // impacting the internal face, so negate the normal.
+                Vec3d normal = isInAir ? i.N : -i.N;
                 
                 // Calculate refracted illumination.
                 const double n_i = isInAir ? AIR_REFRACTION_INDEX : m.index(i);
@@ -108,27 +103,15 @@ Vec3d RayTracer::traceRay( const ray& r,
                 {
                     const double cos_theta_t = sqrt(cos_theta_t_root_term);
                     const Vec3d refractionDir = (n_ratio * cos_theta_i - cos_theta_t) * normal - n_ratio * viewingDir;
-                    if (debugMode) cerr << depth << ": Refraction dir: " << refractionDir << endl;
                     ray refractionRay(r.at(i.t) + (refractionDir * RAY_EPSILON), refractionDir, ray::REFRACTION);
                     const Vec3d refractionShade = traceRay(refractionRay, thresh, depth + 1, !isInAir);
                     refractShade = prod(m.kt(i), refractionShade);
                 }
-                else if (debugMode)
-                {
-                    cerr << depth << ": TIR" << endl;
-                }
             }
         }
-        
-	
-	} else {
-		// No intersection.  This ray travels to infinity, so we color
-		// it according to the background color, which in this (simple) case
-		// is just black.
-        if (debugMode) cerr << depth << ": No intersection." << endl;
-		//return Vec3d( 0.0, 0.0, 0.0 );
-	}
+    }
     
+    if (debugMode && r.type() == ray::VISIBILITY) cerr << "Direct: " << directShade << ", Reflect: " << reflectShade << ", Refract: " << refractShade << endl;
     return directShade + reflectShade + refractShade;
 }
 

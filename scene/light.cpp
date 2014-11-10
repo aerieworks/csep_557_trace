@@ -6,6 +6,7 @@
 using namespace std;
 
 extern TraceUI* traceUI;
+extern bool debugMode;
 
 double DirectionalLight::distanceAttenuation( const Vec3d& P ) const
 {
@@ -19,16 +20,26 @@ Vec3d DirectionalLight::shadowAttenuation( const Vec3d& P ) const
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
     const Vec3d direction = getDirection(P);
-    const ray r(P + direction * RAY_EPSILON, direction, ray::SHADOW);
+    ray r(P + direction * RAY_EPSILON, direction, ray::SHADOW);
     isect i;
-    if (scene->intersect(r, i))
+    Vec3d attenuation = Vec3d(1, 1, 1);
+    while (scene->intersect(r, i))
     {
         // No need to check distance to object, since directional lights are infinitely far away.
         // Object is guaranteed to be closer.
-        return Vec3d(0, 0, 0);
+        if (traceUI->getTransparentColorFilteringEnabled())
+        {
+            attenuation = prod(attenuation, i.getMaterial().kt(i));
+            r = ray(r.at(i.t) + direction * RAY_EPSILON, direction, ray::SHADOW);
+        }
+        else
+        {
+            attenuation *= 0;
+            break;
+        }
     }
     
-    return Vec3d(1,1,1);
+    return attenuation;
 }
 
 Vec3d DirectionalLight::getColor( const Vec3d& P ) const
@@ -76,16 +87,30 @@ Vec3d PointLight::shadowAttenuation(const Vec3d& P) const
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
     const Vec3d direction = getDirection(P);
-    const ray r(P + direction * RAY_EPSILON, direction, ray::SHADOW);
+    ray r(P + direction * RAY_EPSILON, direction, ray::SHADOW);
     isect i;
-    if (scene->intersect(r, i))
+    Vec3d attenuation(1, 1, 1);
+    while (scene->intersect(r, i))
     {
         const Vec3d isectPoint = r.at(i.t);
         if ((isectPoint - P).length() < (position - P).length())
         {
-            return Vec3d(0, 0, 0);
+            if (traceUI->getTransparentColorFilteringEnabled())
+            {
+                attenuation = prod(attenuation, i.getMaterial().kt(i));
+                r = ray(isectPoint + direction * RAY_EPSILON, direction, ray::SHADOW);
+            }
+            else
+            {
+                attenuation *= 0;
+                break;
+            }
+        }
+        else
+        {
+            break;
         }
     }
     
-    return Vec3d(1,1,1);
+    return attenuation;
 }

@@ -46,6 +46,8 @@ public:
     Fl_Slider*          m_distAttenCSlider;
     Fl_Check_Button*    m_reflectionEnabledCheckButton;
     Fl_Check_Button*    m_refractionEnabledCheckButton;
+    Fl_Check_Button*    m_transparentColorFilteringEnabledCheckButton;
+    Fl_Check_Button*    m_phongNormalInterpolationEnabledCheckButton;
     
 #ifdef MULTITHREADED
 	Fl_Slider*			m_threadSlider;
@@ -88,7 +90,9 @@ private:
     static void cb_distAttenCSlides(Fl_Widget* o, void* v);
     static void cb_reflectionEnabledCheckButton(Fl_Widget* o, void* v);
     static void cb_refractionEnabledCheckButton(Fl_Widget* o, void* v);
-
+    static void cb_transparentColorFilteringEnabledCheckButton(Fl_Widget* o, void* v);
+    static void cb_phongNormalInterpolationEnabledCheckButton(Fl_Widget* o, void* v);
+    
 #ifdef MULTITHREADED
 	static void cb_threadSlides(Fl_Widget* o, void* v);
 	static void threadStart(ThreadPool* tp, void* arg);

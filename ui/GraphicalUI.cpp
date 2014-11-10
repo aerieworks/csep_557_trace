@@ -196,6 +196,16 @@ void GraphicalUI::cb_refractionEnabledCheckButton(Fl_Widget* o, void* v)
     ((GraphicalUI*)(o->user_data()))->m_refractionEnabled = (((Fl_Check_Button *)o)->value() == 1);
 }
 
+void GraphicalUI::cb_transparentColorFilteringEnabledCheckButton(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_transparentColorFilteringEnabled = (((Fl_Check_Button *)o)->value() == 1);
+}
+
+void GraphicalUI::cb_phongNormalInterpolationEnabledCheckButton(Fl_Widget* o, void* v)
+{
+    ((GraphicalUI*)(o->user_data()))->m_phongNormalInterpolationEnabled = (((Fl_Check_Button *)o)->value() == 1);
+}
+
 #ifdef MULTITHREADED
 void GraphicalUI::cb_threadSlides(Fl_Widget* o, void* v)
 {
@@ -225,6 +235,7 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v)
 	char buffer[256];
 
 	GraphicalUI* pUI=((GraphicalUI*)(o->user_data()));
+    clock_t start = clock();
 	
 	if (pUI->raytracer->sceneLoaded()) {
 		pUI->width=pUI->getSize();
@@ -299,7 +310,9 @@ void GraphicalUI::cb_render(Fl_Widget* o, void* v)
 		pUI->m_traceGlWindow->refresh();
 
 		// Restore the window label
-		pUI->m_traceGlWindow->label(old_label);		
+		pUI->m_traceGlWindow->label(old_label);
+        
+        std::cerr << "Render time: " << (double)(clock() - start) / (double)CLOCKS_PER_SEC << " seconds" << std::endl;
 	}
 }
 
@@ -358,7 +371,7 @@ void GraphicalUI::stopTracing()
 GraphicalUI::GraphicalUI() : m_nativeChooser(NULL) {
 	// init.
 
-	m_mainWindow = new Fl_Window(100, 40, 350, 310, "Ray <Not Loaded>");
+	m_mainWindow = new Fl_Window(100, 40, 350, 350, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
 		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
@@ -441,24 +454,34 @@ GraphicalUI::GraphicalUI() : m_nativeChooser(NULL) {
         m_distAttenCSlider->align(FL_ALIGN_RIGHT);
         m_distAttenCSlider->callback(cb_distAttenCSlides);
     
-        m_reflectionEnabledCheckButton = new Fl_Check_Button(0, 205, 180, 20, "Reflection Enabled");
+        m_phongNormalInterpolationEnabledCheckButton = new Fl_Check_Button(0, 180, 335, 20, "Phong Normal Interpolation Enabled (When Avail.)");
+        m_phongNormalInterpolationEnabledCheckButton->user_data((void*)(this));
+        m_phongNormalInterpolationEnabledCheckButton->callback(cb_phongNormalInterpolationEnabledCheckButton);
+        m_phongNormalInterpolationEnabledCheckButton->value(m_phongNormalInterpolationEnabled);
+    
+        m_transparentColorFilteringEnabledCheckButton = new Fl_Check_Button(0, 205, 250, 20, "Transparent Color Filtering Enabled");
+        m_transparentColorFilteringEnabledCheckButton->user_data((void*)(this));
+        m_transparentColorFilteringEnabledCheckButton->callback(cb_transparentColorFilteringEnabledCheckButton);
+        m_transparentColorFilteringEnabledCheckButton->value(m_transparentColorFilteringEnabled);
+    
+        m_reflectionEnabledCheckButton = new Fl_Check_Button(0, 230, 180, 20, "Reflection Enabled");
         m_reflectionEnabledCheckButton->user_data((void*)(this));
         m_reflectionEnabledCheckButton->callback(cb_reflectionEnabledCheckButton);
         m_reflectionEnabledCheckButton->value(m_reflectionEnabled);
 
-        m_refractionEnabledCheckButton = new Fl_Check_Button(0, 230, 180, 20, "Refraction Enabled");
+        m_refractionEnabledCheckButton = new Fl_Check_Button(0, 255, 180, 20, "Refraction Enabled");
         m_refractionEnabledCheckButton->user_data((void*)(this));
         m_refractionEnabledCheckButton->callback(cb_refractionEnabledCheckButton);
         m_refractionEnabledCheckButton->value(m_refractionEnabled);
 
         // set up debugging display checkbox
-        m_debuggingDisplayCheckButton = new Fl_Check_Button(0, 280, 180, 20, "Debugging display");
+        m_debuggingDisplayCheckButton = new Fl_Check_Button(0, 305, 180, 20, "Debugging display");
 		m_debuggingDisplayCheckButton->user_data((void*)(this));
 		m_debuggingDisplayCheckButton->callback(cb_debuggingDisplayCheckButton);
 		m_debuggingDisplayCheckButton->value(m_displayDebuggingInfo);
 
 		// set up BSP acceleration checkbox
-        m_bsp_enabledCheckButton= new Fl_Check_Button(0, 255, 180, 20, "BSP Acceleration Enabled");
+        m_bsp_enabledCheckButton= new Fl_Check_Button(0, 280, 180, 20, "BSP Acceleration Enabled");
 		m_bsp_enabledCheckButton->user_data((void*)(this));
 		m_bsp_enabledCheckButton->callback(cb_bspEnabledCheckButton);
 		m_bsp_enabledCheckButton->value(m_bsp_enabled_value);

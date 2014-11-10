@@ -90,16 +90,15 @@ bool Geometry::intersect(const ray&r, isect&i) const
 
     ray localRay( pos, dir, r.type() );
 
+    bool result = false;
     if (intersectLocal(localRay, i)) {
         // Transform the intersection point & normal returned back into global space.
 		i.N = transform->localToGlobalCoordsNormal(i.N);
 		i.t /= length;
 
-		return true;
-    } else {
-        return false;
+        result = true;
     }
-    
+    return result;
 }
 
 bool Geometry::hasBoundingBoxCapability() const

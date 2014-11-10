@@ -1,8 +1,10 @@
 #include <cmath>
 #include <float.h>
 #include "trimesh.h"
+#include "TraceUI.h"
 
 using namespace std;
+extern TraceUI* traceUI;
 
 Trimesh::~Trimesh()
 {
@@ -14,6 +16,8 @@ Trimesh::~Trimesh()
 void Trimesh::addVertex( const Vec3d &v )
 {
     vertices.push_back( v );
+    boundingBox.min = minimum(boundingBox.min, v);
+    boundingBox.max = maximum(boundingBox.max, v);
 }
 
 void Trimesh::addMaterial( Material *m )
@@ -77,48 +81,46 @@ bool TrimeshFace::intersectLocal( const ray& r, isect& i ) const
     const Vec3d& b = parent->vertices[ids[1]];
     const Vec3d& c = parent->vertices[ids[2]];
     
-    // Calculate properties defining triangle plane.
-    // ax + by + cz = d
-    // or: n = [a b c]^T, x = [x y z]^T, n * x = d
-    // Solve for n by taking the cross product of vectors representing two triangle sides.
-    Vec3d faceNormal = (b - a) ^ (c - a);
-    faceNormal.normalize();
-    
-    // Solve plane equation for d, using a triangle vertex as a known x that is in the plane.
-    const double d = faceNormal * a;
-    
     // Time when ray intersects plane is found by:
     // t = (d - n * ray.position) / (n * ray.direction)
-    const double normalDotDirection = faceNormal * r.getDirection();
+    const double normalDotDirection = normal * r.getDirection();
     if (normalDotDirection != 0)
     {
         // A non-zero means the ray intersects the plane, need to see if it does so in the triangle.
-        const double t = (d - (faceNormal * r.getPosition())) / normalDotDirection;
-        const Vec3d q = r.at(t);
-        const double abqDotN = ((b - a) ^ (q - a)) * faceNormal;
-        if (abqDotN >= 0)
+        const double t = (facePlaneD - (normal * r.getPosition())) / normalDotDirection;
+        if (t > RAY_EPSILON)
         {
-            const double qbcDotN = ((c - b) ^ (q - b)) * faceNormal;
-            if (qbcDotN >= 0)
+            const Vec3d q = r.at(t);
+            const double abqDotN = ((b - a) ^ (q - a)) * normal;
+            if (abqDotN >= 0)
             {
-                const double aqcDotN = ((a - c) ^ (q - c)) * faceNormal;
-                if (aqcDotN >= 0)
+                const double qbcDotN = ((c - b) ^ (q - b)) * normal;
+                if (qbcDotN >= 0)
                 {
-                    const double abcDotN = ((b - a) ^ (c - a)) * faceNormal;
-                    const double alpha = qbcDotN / abcDotN;
-                    const double beta = aqcDotN / abcDotN;
-                    const double gamma = abqDotN  / abcDotN;
-            
-                    Vec3d normal(parent->normals[ids[0]] * alpha +
-                                 parent->normals[ids[1]] * beta +
-                                 parent->normals[ids[2]] * gamma);
-                    normal.normalize();
-            
-                    i.setN(normal);
-                    i.setMaterial(*material);
-                    i.setObject(this);
-                    i.setT(t);
-                    return true;
+                    const double aqcDotN = ((a - c) ^ (q - c)) * normal;
+                    if (aqcDotN >= 0)
+                    {
+                        if (parent->normals.size() > 0 && traceUI->getPhongNormalInterpolationEnabled())
+                        {
+                            const double alpha = qbcDotN / barycentricDenominator;
+                            const double beta = aqcDotN / barycentricDenominator;
+                            const double gamma = abqDotN  / barycentricDenominator;
+                    
+                            i.setN(Vec3d(parent->normals[ids[0]] * alpha +
+                                         parent->normals[ids[1]] * beta +
+                                         parent->normals[ids[2]] * gamma));
+                            i.N.normalize();
+                        }
+                        else
+                        {
+                            i.setN(normal);
+                        }
+                        
+                        i.setMaterial(*material);
+                        i.setObject(this);
+                        i.setT(t);
+                        return true;
+                    }
                 }
             }
         }
@@ -138,20 +140,20 @@ Trimesh::generateNormals()
     int *numFaces = new int[ cnt ]; // the number of faces assoc. with each vertex
     memset( numFaces, 0, sizeof(int)*cnt );
     
+    int faceIndex = 0;
     for( Faces::iterator fi = faces.begin(); fi != faces.end(); ++fi )
     {
         Vec3d a = vertices[(**fi)[0]];
         Vec3d b = vertices[(**fi)[1]];
         Vec3d c = vertices[(**fi)[2]];
         
-        Vec3d faceNormal = ((b-a) ^ (c-a));
-		faceNormal.normalize();
-        
         for( int i = 0; i < 3; ++i )
         {
-            normals[(**fi)[i]] += faceNormal;
+            normals[(**fi)[i]] += (**fi).getNormal();
             ++numFaces[(**fi)[i]];
         }
+        
+        faceIndex++;
     }
 
     for( int i = 0; i < cnt; ++i )

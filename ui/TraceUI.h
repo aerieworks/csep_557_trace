@@ -29,6 +29,8 @@ public:
         m_distAttenA(0.1), m_distAttenB(0.2), m_distAttenC(0.01),
         m_reflectionEnabled(true),
         m_refractionEnabled(true),
+        m_transparentColorFilteringEnabled(true),
+        m_phongNormalInterpolationEnabled(true),
 		m_displayDebuggingInfo( false ),
 		m_bsp_enabled_value( true ), 
 		raytracer( 0 )
@@ -51,6 +53,8 @@ public:
     double  getDistanceAttenuationC() const { return m_distAttenC; }
     bool    getReflectionEnabled() const { return m_reflectionEnabled; }
     bool    getRefractionEnabled() const { return m_refractionEnabled; }
+    bool    getTransparentColorFilteringEnabled() const { return m_transparentColorFilteringEnabled; }
+    bool    getPhongNormalInterpolationEnabled() const { return m_phongNormalInterpolationEnabled; }
 
 	void setMultithreading(bool multithread) { this->multithread = multithread; }
 	bool isMultithreading() const { return multithread; }
@@ -68,7 +72,9 @@ protected:
     double      m_distAttenC;
     bool        m_reflectionEnabled;
     bool        m_refractionEnabled;
-    
+    bool        m_transparentColorFilteringEnabled;
+    bool        m_phongNormalInterpolationEnabled;
+
 	int num_threads;
 
 	int width;
@@ -80,7 +86,6 @@ protected:
 	// for individual rays.  Disabled by default for efficiency
 	// reasons.
 	bool		m_displayDebuggingInfo;
-
 
 public:
 	bool		getBSPEnabled() const { return m_bsp_enabled_value; }

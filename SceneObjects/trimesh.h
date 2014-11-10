@@ -20,6 +20,7 @@ class Trimesh : public MaterialSceneObject
     Faces faces;
     Normals normals;
     Materials materials;
+    BoundingBox boundingBox;
 public:
     Trimesh( Scene *scene, Material *mat, TransformNode *transform )
         : MaterialSceneObject(scene, mat), 
@@ -43,7 +44,9 @@ public:
     char *doubleCheck();
     
     void generateNormals();
-
+    virtual bool hasBoundingBoxCapability() const { return true; }
+    virtual BoundingBox ComputeLocalBoundingBox() { return boundingBox; }
+    
 protected:
 	void glDrawLocal(int quality, bool actualMaterials, bool actualTextures) const;
 
@@ -55,6 +58,10 @@ class TrimeshFace : public MaterialSceneObject
 {
     Trimesh *parent;
     int ids[3];
+    Vec3d normal;
+    double barycentricDenominator;
+    double facePlaneD;
+    
 public:
     TrimeshFace( Scene *scene, Material *mat, Trimesh *parent, int a, int b, int c)
         : MaterialSceneObject( scene, mat )
@@ -63,6 +70,20 @@ public:
         ids[0] = a;
         ids[1] = b;
         ids[2] = c;
+        
+        Vec3d vecA = parent->vertices[ids[0]];
+        Vec3d vecB = parent->vertices[ids[1]];
+        Vec3d vecC = parent->vertices[ids[2]];
+        
+        Vec3d abCrossAc = (vecB - vecA) ^ (vecC - vecA);
+        normal = abCrossAc;
+        if (normal.length() > 0)
+        {
+            normal.normalize();
+        }
+        
+        facePlaneD = normal * vecA;
+        barycentricDenominator = abCrossAc * getNormal();
     }
 
     int operator[]( int i ) const
@@ -70,6 +91,8 @@ public:
         return ids[i];
     }
 
+    const Vec3d& getNormal() const { return normal; }
+    
     virtual bool intersectLocal( const ray& r, isect& i ) const;
 
     virtual bool hasBoundingBoxCapability() const { return true; }
