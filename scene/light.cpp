@@ -63,9 +63,9 @@ double PointLight::distanceAttenuation( const Vec3d& P ) const
     const double distance = (position - P).length();
     // Model distance attenuation as:
     //      1 / (A + Bd + Cd^2)
-    return min(1.0, 1.0 / (traceUI->getDistanceAttenuationA()
-                           + traceUI->getDistanceAttenuationB() * distance
-                           + traceUI->getDistanceAttenuationC() * pow(distance, 2)));
+    return min(1.0, 1.0 / (constantTerm
+                           + linearTerm * distance
+                           + quadraticTerm * pow(distance, 2)));
 }
 
 Vec3d PointLight::getColor( const Vec3d& P ) const

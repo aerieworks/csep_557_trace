@@ -26,7 +26,6 @@ class TraceUI {
 public:
 	TraceUI()
 		: m_nDepth(3), m_nSize(512),
-        m_distAttenA(0.1), m_distAttenB(0.2), m_distAttenC(0.01),
         m_reflectionEnabled(true),
         m_refractionEnabled(true),
         m_transparentColorFilteringEnabled(true),
@@ -48,9 +47,6 @@ public:
 	// accessors:
 	int		getSize() const { return m_nSize; }
 	int		getDepth() const { return m_nDepth; }
-    double  getDistanceAttenuationA() const { return m_distAttenA; }
-    double  getDistanceAttenuationB() const { return m_distAttenB; }
-    double  getDistanceAttenuationC() const { return m_distAttenC; }
     bool    getReflectionEnabled() const { return m_reflectionEnabled; }
     bool    getRefractionEnabled() const { return m_refractionEnabled; }
     bool    getTransparentColorFilteringEnabled() const { return m_transparentColorFilteringEnabled; }
@@ -67,9 +63,6 @@ protected:
 
 	int			m_nSize;				// Size of the traced image
 	int			m_nDepth;				// Max depth of recursion
-    double      m_distAttenA;
-    double      m_distAttenB;
-    double      m_distAttenC;
     bool        m_reflectionEnabled;
     bool        m_refractionEnabled;
     bool        m_transparentColorFilteringEnabled;
