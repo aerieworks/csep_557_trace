@@ -1,0 +1,132 @@
+SBT-raytracer 1.0
+
+// box_cyl_reflect.ray
+// Test the reflection term
+// Don't forget to increase the trace depth to >= 2!
+
+
+
+camera
+{
+  position = (18, 15, 5);
+  viewdir = (-1, -0.66, 0);
+  updir = (0, 0, 1);
+}
+
+// Using ambient intensity of 0.25
+//ambient_light
+//{
+  //color = (0.25, 0.25, 0.25);
+//}
+
+// Directional light which shouldn't
+// cast any shadows
+point_light
+{
+  position = (0, 0, 7.75);
+  color = (1, 1, 0.8);
+  constant_attenuation_coeff = 0.25;
+  linear_attenuation_coeff = 0.003372407;
+  quadratic_attenuation_coeff = 0.000045492;
+}
+
+// The floor
+scale(41, 41, 0.1,
+  box {
+    material = {
+      diffuse = (0.55, 0.3, 0);
+    }
+  }
+)
+
+// The ceiling
+translate(0, 0, 10, scale(41, 41, 0.1,
+  box { material = {
+    diffuse = (0.95, 0.95, 0.95);
+  } }
+) )
+
+// The walls
+translate(0, -20, 7, scale(41, 0.1, 15,
+  box { material = { diffuse = (0.025, 0.4, 0.6); } }
+) )
+translate(-20, 0, 7, scale(0.1, 41, 15,
+  box { material = { diffuse = (0.025, 0.4, 0.6); } }
+) )
+translate(0, 20, 7, scale(41, 0.1, 15,
+  box { material = { diffuse = (0.025, 0.4, 0.6); } }
+) )
+translate(20, 0, 7, scale(0.1, 41, 15,
+  box { material = { diffuse = (0.025, 0.4, 0.6); } }
+) )
+
+// Light bulb cord
+translate(0, 0, 8, scale(0.05, 0.05, 2,
+  cylinder {
+    material = { }
+  }
+) )
+
+// Light bulb
+translate(0, 0, 8, scale(0.125, 0.125, 0.25,
+  cylinder { material = {
+    diffuse = (0.5, 0.5, 0.5);
+    reflective = (0.8, 0.8, 0.8);
+    specular = (0.9, 0.9, 0.9);
+    shininess = 15;
+  } }
+) )
+translate(0, 0, 7.75, scale(0.25, 0.25, 0.25,
+  sphere { material = {
+    emissive = (0.75, 0.75, 0.6);
+    diffuse = (0.9, 0.9, 0.9);
+    transmissive = (0.99, 0.99, 0.99);
+    reflective = (0, 0, 0);
+    index = 1.52;
+  } }
+) )
+
+// Chair
+  // Seat
+  translate(0, 0, 1.875, scale(2, 2, 0.25,
+    box { material = {
+      diffuse = (0.25, 0.15, 0.05);
+    } }
+  ) )
+  // Back
+  translate(0, -0.875, 3.25, scale(2, 0.25, 2.5,
+    box { material = {
+      diffuse = (0.25, 0.15, 0.05);
+    } }
+  ) )
+  // Legs
+  translate(-0.875, -0.875, 0.875, scale(0.25, 0.25, 1.75,
+    box { material = { diffuse = (0.25, 0.15, 0.05); } }
+  ) )
+  translate(0.875, -0.875, 0.875, scale(0.25, 0.25, 1.75,
+    box { material = { diffuse = (0.25, 0.15, 0.05); } }
+  ) )
+  translate(-0.875, 0.875, 0.875, scale(0.25, 0.25, 1.75,
+    box { material = { diffuse = (0.25, 0.15, 0.05); } }
+  ) )
+  translate(0.875, 0.875, 0.875, scale(0.25, 0.25, 1.75,
+    box { material = { diffuse = (0.25, 0.15, 0.05); } }
+  ) )
+
+// Mirrors
+translate(-19.95, 0, 5, scale(0.05, 20, 8,
+  box { material = {
+    diffuse = (0.01, 0.01, 0.01);
+    reflective = (0.99, 0.99, 0.99);
+    specular = (0.12, 0.12, 0.12);
+    shininess = 20;
+  } }
+) )
+translate(19.95, 0, 5, scale(0.05, 20, 8,
+  box { material = {
+    diffuse = (0.01, 0.01, 0.01);
+    reflective = (0.99, 0.99, 0.99);
+    specular = (0.12, 0.12, 0.12);
+    shininess = 20;
+  } }
+) )
